@@ -1,41 +1,49 @@
-import React from 'react'
+import React,{useEffect,useState} from 'react'
 import {BsSearch} from 'react-icons/bs'
+import {fetchData} from "../service"
 
-function RecipeLists() {
+function RecipeLists(props) {
+    const [searchedTerm, setSearchedTerm] = useState('')
+    const [query,setQuery] = useState('pasta')
+    const [data,setData] = useState('');
+    const searchrecipe = (searchQuery) => {
+        fetchData(searchQuery).then((response)=> {
+            setData(response)
+            props.setLoader(false)
+        })
+       }
+
+    useEffect(()=>{
+        fetchData(query).then((response) => {
+            setData(response)
+            props.setLoader(false)
+        })
+    },[])
     return (
         <div className='container'>
         <div className='heading-line'>
             <strong>Search Recipes</strong>
             <div className='input-wrapper' >
-                <input type="text" placeholder='Search' />
-                <button ><BsSearch /></button>
+                <input 
+                    onChange={(e)=> setSearchedTerm(e.target.value)} 
+                    value={searchedTerm}
+                    type="text" 
+                    placeholder='Search your recipes' />
+                <button onClick={()=> (searchrecipe(searchedTerm),props.setLoader(true))} ><BsSearch /></button>
             </div> 
         </div>
         <div className='flexbox'>
-            <div className='flexItem'>
-                <div className='img-wrapper'>
-                    <img src="https://images.unsplash.com/photo-1607532941433-304659e8198a?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1378&q=80" alt='item.recipe.label' />
-                </div>
-                <p>Pizza Recipe</p>
+            {
+                data && data.hits.map((item,index)=> (
+                    <div key={index} className='flexItem'>
+                        <div className='img-wrapper'>
+                            <img src={item.recipe.image} alt={item.recipe.label} />
+                    </div>
+                <p>{item.recipe.label}</p>
             </div>
-            <div className='flexItem'>
-                <div className='img-wrapper'>
-                    <img src="https://images.unsplash.com/photo-1607532941433-304659e8198a?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1378&q=80" alt='item.recipe.label' />
-                </div>
-                <p>Pizza Recipe</p>
-            </div>
-            <div className='flexItem'>
-                <div className='img-wrapper'>
-                    <img src="https://images.unsplash.com/photo-1607532941433-304659e8198a?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1378&q=80" alt='item.recipe.label' />
-                </div>
-                <p>Pizza Recipe</p>
-            </div>
-            <div className='flexItem'>
-                <div className='img-wrapper'>
-                    <img src="https://images.unsplash.com/photo-1607532941433-304659e8198a?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1378&q=80" alt='item.recipe.label' />
-                </div>
-                <p>Pizza Recipe</p>
-            </div>
+                ))
+            }
+
         </div>
     </div>
     )
